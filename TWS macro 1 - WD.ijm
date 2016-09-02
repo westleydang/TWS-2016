@@ -5,7 +5,8 @@ probability map of the cells, then uses that image to create masks
 for each channel and counts the overlap.
 */
 
-// Variables and constants, change these parameters to fit your image resolution and stuff
+// Variables and constants
+, change these parameters to fit your image resolution and stuff
 setBatchMode(false);
 FILENAME = getInfo("image.filename");
 MASK_ENLARGE = 10; // this is how big your cell masks will be
@@ -22,7 +23,8 @@ maskNameArray = newArray(nSlices)
 // Process the probability map (PM)
 
 // Open the image and dupilicate the slice so that only the
-// dark-background image is in the slice. Close the orignal PM. Rename new PM. 
+// dark-background image is in the slice. Close the orignal PM. Rename new PM.
+
 
 
 
@@ -34,7 +36,8 @@ rename("DuplicatePM");
 processImageBinary(OUTLIERS_SIZE, EXCLUSION_SIZE, EXCLUSION_CIRC);
 
 // Create masks for each slice in the processed binary, passed with these mask parameters
-createMasksForEachSlice(MASK_ENLARGE, MASK_MAXIMA);
+
+createMasksForEachSlice(MASK_ENLARGE, MASK_MAXIMA);
 
 
 // Concatenate all the masks to analyze for overlap, then save.
@@ -48,8 +51,9 @@ rename("OG and mask");
 
 
 
-/* =====================================================
-End of macro. All functions defined below. 
+
+/* =====================================================
+End of macro. All functions defined below.
 =======================================================*/
 
 
@@ -74,7 +78,7 @@ function processImageBinary(outliers, sizeExclusion, circExclusion) {
   run("Analyze Particles...", "size="+sizeExclusion+"-Infinity circularity="+circExclusion+"-1.00 show=Masks stack");
   run("Select None");
   run("Invert", "stack");
-  
+
 } // end function processImageBinary()
 
 
@@ -90,13 +94,12 @@ function createMasksForEachSlice(enlargeConstant, maximaConstant) {
   	run("Select None");
     run("Find Maxima...", "noise="+maximaConstant+" output=[Point Selection]");
     run("Enlarge...", "enlarge="+enlargeConstant+"");
-    run("Create Mask"); 
+    run("Create Mask");
+
   	run("Watershed", "stack");
     rename("Mask-"+currentSlice+"");
     //maskNameArray[currentSlice-1] = "Mask-"+currentSlice+"";
     selectWindow("Mask of DuplicatePM");
   }
-} // end function createMasksForEachSlice()
-
-
-
+}
+ // end function createMasksForEachSlice()
