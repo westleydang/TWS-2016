@@ -5,11 +5,9 @@ probability map of the cells, then uses that image to create masks
 for each channel and counts the overlap.
 */
 
-// Variables and constants
-, change these parameters to fit your image resolution and stuff
+// Variables and constants, change these parameters to fit your image resolution and stuff
 setBatchMode(false);
-FILENAME = getInfo("image.filename");
-MASK_ENLARGE = 10; // this is how big your cell masks will be
+FILENAME = getInfo("image.filename"); // this is the original file name of the opened fileMASK_ENLARGE = 10; // this is how big your cell masks will be
 MASK_MAXIMA = 50; // this is the noise tolerance for Finding Maxima
 EXCLUSION_SIZE = 100; // everything under this many pixels is excluded in mask
 EXCLUSION_CIRC = 0.30 // everything under this circularity is excluded in mask
@@ -36,7 +34,6 @@ rename("DuplicatePM");
 processImageBinary(OUTLIERS_SIZE, EXCLUSION_SIZE, EXCLUSION_CIRC);
 
 // Create masks for each slice in the processed binary, passed with these mask parameters
-
 createMasksForEachSlice(MASK_ENLARGE, MASK_MAXIMA);
 
 
@@ -95,7 +92,6 @@ function createMasksForEachSlice(enlargeConstant, maximaConstant) {
     run("Find Maxima...", "noise="+maximaConstant+" output=[Point Selection]");
     run("Enlarge...", "enlarge="+enlargeConstant+"");
     run("Create Mask");
-
   	run("Watershed", "stack");
     rename("Mask-"+currentSlice+"");
     //maskNameArray[currentSlice-1] = "Mask-"+currentSlice+"";
