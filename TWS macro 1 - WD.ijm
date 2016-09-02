@@ -5,7 +5,7 @@ probability map of the cells, then uses that image to create masks
 for each channel and counts the overlap.
 */
 
-// Variables and constants, change these parameters to fit your image resolution and stuff
+// Variables and constants, change these CAPITALIZED parameters to fit your image resolution and stuff
 setBatchMode(false);
 FILENAME = getInfo("image.filename"); // this is the original file name of the opened fileMASK_ENLARGE = 10; // this is how big your cell masks will be
 MASK_MAXIMA = 50; // this is the noise tolerance for Finding Maxima
@@ -16,6 +16,10 @@ maskNameArray = newArray(nSlices)
 
 
 // Open the TWS and make the probability map
+// Batch all the images at once in one function
+// Call the batch function with a command
+
+
 
 
 // Process the probability map (PM)
