@@ -11,7 +11,7 @@ outTransformDir = File.getParent(toTransformDir)+"\\"+File.getName(toTransformDi
 File.makeDirectory(outTransformDir);
 print("*** Made this directory... "+outTransformDir);
 
-
+setBatchMode(true);
 // Run the macro for each images
 // output the images to the subdirectory defined earlier
 for (currentCaterpillar = 0; currentCaterpillar < toTransformList.length; currentCaterpillar++) {
