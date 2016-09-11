@@ -1,20 +1,18 @@
 /*
 @Author: Westley Dang
 This macro uses the Trainable WEKA Segmentation plugin to create a
-probability map of the cells, then uses that image to create masks
+results of the cells locattion, then uses that image to create masks
 for each channel and counts the overlap.
 */
 
 // Variables and constants, change these CAPITALIZED parameters to fit your image resolution and stuff
 setBatchMode(false);
-FILENAME = getInfo("image.filename"); // this is the original file name of the opened fileMASK_ENLARGE = 10; // this is how big your cell masks will be
+FILENAME = getInfo("image.filename"); // this is the original file name of the opened fileMASK_ENLARGE = 5; // this is how big your cell masks will be
 NAME_NO_EXT = File.nameWithoutExtension; // file name without extension
-print("file name should be... "+FILENAME);
-print("name no ext = "+NAME_NO_EXT);
 MASK_MAXIMA = 50; // this is the noise tolerance for Finding Maxima
-EXCLUSION_SIZE = 100; // everything under this many pixels is excluded in mask
+EXCLUSION_SIZE = 40; // everything under this many pixels is excluded in mask
 EXCLUSION_CIRC = 0.30; // everything under this circularity is excluded in mask
-OUTLIERS_SIZE = 5; // removing outliers
+OUTLIERS_SIZE = 4; // removing outliers
 maskNameArray = newArray(nSlices);
 
 
@@ -35,9 +33,10 @@ maskNameArray = newArray(nSlices);
 
 // Duplicate the original PM; new working file is DuplicatePM, original file is the var filename
 run("Duplicate...", "duplicate");
-rename("DuplicatePM");
+rename("Duplicate");
 
 // Process the image binary
+// results in Binary_Duplicate
 processImageBinary(OUTLIERS_SIZE, EXCLUSION_SIZE, EXCLUSION_CIRC);
 
 // Create masks for each slice in the processed binary, passed with these mask parameters
@@ -46,12 +45,13 @@ createMasksForEachSlice(MASK_ENLARGE, MASK_MAXIMA);
 
 // Create new original intersection
 selectWindow(FILENAME);
-run("Stack to Images");
-intersect(NAME_NO_EXT+"-0002", NAME_NO_EXT+"-0003");
-print("interesected 1");
-rename(NAME_NO_EXT+"-OL23");
-run("Images to Stack", "method=[Copy (center)] name="+NAME_NO_EXT+" title="+NAME_NO_EXT+"-"+" use");
-rename("OG")
+run("Stack Splitter", "number="+nSlices);
+// images as slice000x_FILENAME
+
+intersect("slice0002_"+FILENAME, "slice0003_"+FILENAME);
+print("intersected 1");
+rename("sliceOL23_"+NAME_NO_EXT);
+run("Images to Stack", "method=[Copy (center)] name=[OG] title=slice use");
 
 // Create mask intersection
 intersect("Mask-2", "Mask-3")
@@ -60,9 +60,32 @@ rename("Mask-OL23")
 // Concatenate all the masks to analyze for overlap, then save.
 run("Concatenate...", "  title=[CombinedMasks] image1=Mask-1 image2=Mask-2 image3=Mask-3 image4=Mask-OL23 create");
 
+// save the real channel masks to compare to the original image
+selectWindow("CombinedMasks");
+run("Duplicate...", "duplicate");
+rename("CombinedMasksDuplicate");
+setSlice(4);
+run("Delete Slice");
+selectWindow(FILENAME);
+saveWhatAsWhere("CombinedMasksDuplicate", "tif", getInfo("image.directory")+"\\toCompareToOrig_"+FILENAME);
+close();
+
+// save all the masks into one file
+selectWindow("CombinedMasks");
+run("Duplicate...", "duplicate");
+rename("CombinedMasksDuplicate");
+selectWindow(FILENAME); // you have to select this otherwise you can't grab the image directory
+saveWhatAsWhere("CombinedMasksDuplicate", "tif", getInfo("image.directory")+"\\allMasks_"+FILENAME);
+close();
+
+// Save the combined masks
+selectWindow("CombinedMasks");
+
+
 // Overlay the masks onto the orignial channels, then save.
 //run("Concatenate...", "  title=[overlaid] image1=[all da masks] image2=["+filename+"]");
-run("Merge Channels...", "  title=[OG and mask] c1=[CombinedMasks] c2=[OG] create");
+
+run("Merge Channels...", "  title=[Overlay] c1=[CombinedMasks] c2=[OG] create");
 
 
 
@@ -80,7 +103,7 @@ function processImageBinary(outliers, sizeExclusion, circExclusion) {
   // Binarize the PM.
   // Results in image called "Mask of DuplicatePM"
   run("Make Binary", "method=Default background=Dark calculate black");
-  rename("Binary_DuplicatePM");
+  rename("Binary_Duplicate");
 
   // Clean the image by filling in the holes and removing noise.
   // this file is called "<filename>"
@@ -99,7 +122,7 @@ function processImageBinary(outliers, sizeExclusion, circExclusion) {
   run("Analyze Particles...", "size="+sizeExclusion+"-Infinity circularity="+circExclusion+"-1.00 show=Masks stack");
   run("Select None");
   run("Invert", "stack");
-} // end function processImageBinary(), results in image "Binary_DuplicatePM"
+} // end function processImageBinary(), results in image "Binary_Duplicate"
 
 
 function createMasksForEachSlice(enlargeConstant, maximaConstant) {
@@ -108,7 +131,7 @@ function createMasksForEachSlice(enlargeConstant, maximaConstant) {
   // note: variabilize the noise and enlargement variable for diff resolutions
   // note: new mask is called "Mask"
   for (currentSlice = 1; currentSlice < nSlices+1; currentSlice++) {
-    selectWindow("Mask of Binary_DuplicatePM");
+    selectWindow("Mask of Binary_Duplicate");
     print("on " + currentSlice);
     setSlice(currentSlice);
   	run("Select None");
@@ -118,7 +141,7 @@ function createMasksForEachSlice(enlargeConstant, maximaConstant) {
   	run("Watershed", "stack");
     rename("Mask-"+currentSlice);
     //maskNameArray[currentSlice-1] = "Mask-"+currentSlice+"";
-    selectWindow("Mask of Binary_DuplicatePM");
+    selectWindow("Mask of Binary_Duplicate");
   }
 
 } // end function of createMasksForEachSlice, results in 3 masks in images, NOT STACK

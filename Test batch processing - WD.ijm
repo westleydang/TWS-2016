@@ -29,4 +29,6 @@ run("Trainable Weka Segmentation");
   call("trainableSegmentation.Weka_Segmentation.loadClassifier", classifier);
 
 for (currentFile = 0; currentFile < inputFileList.length; currentFile++) {
-  print("		Okay let's work on... " + inputFileList[currentFile]);  selectWindow("Trainable Weka Segmentation v3.1.0");  call("trainableSegmentation.Weka_Segmentation.applyClassifier", inputDirectory,    inputFileList[currentFile], "showResults=false", "storeResults=true",    "probabilityMaps=false", outputDirectory);  print("***    done classifying  "+ inputFileList[currentFile]);/*  selectWindow("Classification result");  rename("result of "+inputFileList[currentFile]);  selectWindow("\\"+inputFileList[currentFile]);  close();*/}
+  selectWindow("Trainable Weka Segmentation v3.1.0");  call("trainableSegmentation.Weka_Segmentation.applyClassifier", inputDirectory,    inputFileList[currentFile], "showResults=false", "storeResults=true",    "probabilityMaps=false", outputDirectory);  print("***    done classifying  "+ inputFileList[currentFile]);/*  selectWindow("Classification result");  rename("result of "+inputFileList[currentFile]);  selectWindow("\\"+inputFileList[currentFile]);  close();*/}
+
+print("*** DONE WITH MACRO");
