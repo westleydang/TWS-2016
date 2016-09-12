@@ -16,6 +16,8 @@ inputDirectory = getDirectory("Choose a Directory");
 numberofROI = askHowManyROI(); // returns numberofROI
 arrayROILabels = newArray(numberofROI);
 askForROILabels(arrayROILabels);
+
+// Draw ROI for each image
 drawROI();
 
 // ***************************************************************************//
@@ -41,10 +43,10 @@ function removeNonImages(array) {
       concat1 = Array.slice(array, 0, i);
       concat2 = Array.slice(array, i+1, array.length);
       // Create a new array that excludes the removee
-      cleanedArray = Array.concat(concat1, concat2);
+      array = Array.concat(concat1, concat2);
     }
   }
-  return cleanedArray;
+  return array;
 } // returns the cleaned array
 
 
@@ -124,8 +126,17 @@ function drawROI() {
     } // finish for each ROI
 
     // save then close image
-    roiManager("save", inputDirectory+"_ROIset.zip");
+    roiManager("save", inputDirectory+getFormattedDate()+"_ROIset.zip");
     close(arrayFileList[eachImage]);
   } // finish for each image
 
 } // finish drawROI function
+
+
+function getFormattedDate() {
+	 getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+     MonthNames = newArray("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+     DayNames = newArray("Sun", "Mon","Tue","Wed","Thu","Fri","Sat");
+     resultDate = ""+dayOfMonth+"-"+MonthNames[month]+"-"+year;
+     return resultDate;
+}
