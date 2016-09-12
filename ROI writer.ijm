@@ -20,8 +20,9 @@ askForROILabels(arrayROILabels);
 // Draw ROI for each image
 drawROI();
 
-// ***************************************************************************//
-
+/*
+============================FUNCTION LIBRARIES BELOW============================
+*/
 
 
 function isImage(filename) {
@@ -49,7 +50,6 @@ function removeNonImages(array) {
   return array;
 } // returns the cleaned array
 
-
 function askHowManyROI() {
   Dialog.create("ROI Setup");
   Dialog.addNumber("Number of ROIs to be Analyzed Per Image: ", 1);
@@ -65,7 +65,6 @@ function askForROILabels(a) {
 		Dialog.addString("ROI "+(r+1)+": ", "");
 	}
   Dialog.show();
-
   // Get the labels, add to the array of names
 	for (r = 0; r < numberofROI; r++) {
     // a is the arrayROILabels that was passed in
@@ -78,10 +77,8 @@ function drawROI() {
   arrayFileList = getFileList(inputDirectory); // returns array
   // Remove non images from the array
   arrayFileList = removeNonImages(arrayFileList);
-
   arrayROIIndex = newArray(numberofROI * lengthOf(arrayFileList));
   arrayROINames = newArray(numberofROI * lengthOf(arrayFileList));
-
 
   run("ROI Manager...");
   roiManager("reset");
@@ -99,30 +96,24 @@ function drawROI() {
       setTool("polygon");
 
       waitForUser("Draw "+arrayROILabels[eachROI]+" -- then click OK");
-      // If no selection, then skip
+
+      // because you can only select by index:
+      currentIndex = ((eachImage*numberofROI)+eachROI);
+      // If no selection, then tag for skipping
       if (selectionType() == (-1)) {
         run("Select All");
         roiManager("Add");
-        // because you can only select by index:
-        currentIndex = ((eachImage*numberofROI)+eachROI);
         currentName = "SKIP"+"_i"+currentIndex+"_"+arrayFileList[eachImage];
-        roiManager("Select", currentIndex);
-        // rename it as, ex: CA1_i34_filename
-        roiManager("rename", currentName);
-        arrayROIIndex[currentIndex] = currentIndex;
-        arrayROINames[currentIndex] = currentName;
       }
       else {
         roiManager("Add");
-        // because you can only select by index:
-        currentIndex = ((eachImage*numberofROI)+eachROI);
-        currentName = arrayROILabels[eachROI]+"_i"+currentIndex+"_"+arrayFileList[eachImage];
-        roiManager("Select", currentIndex);
-        // rename it as, ex: CA1_i34_filename
-        roiManager("rename", currentName);
-        arrayROIIndex[currentIndex] = currentIndex;
-        arrayROINames[currentIndex] = currentName;
+        currentName = arrayROILabels[eachROI]+"_i"+currentIndex+"__"+arrayFileList[eachImage];
       }
+      // rename it as, ex: CA1_i34_filename
+      roiManager("Select", currentIndex);
+      roiManager("rename", currentName);
+      arrayROIIndex[currentIndex] = currentIndex;
+      arrayROINames[currentIndex] = currentName;
     } // finish for each ROI
 
     // save then close image
@@ -132,11 +123,9 @@ function drawROI() {
 
 } // finish drawROI function
 
-
 function getFormattedDate() {
 	 getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
      MonthNames = newArray("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
-     DayNames = newArray("Sun", "Mon","Tue","Wed","Thu","Fri","Sat");
      resultDate = ""+dayOfMonth+"-"+MonthNames[month]+"-"+year;
      return resultDate;
 }
