@@ -28,11 +28,12 @@ OUTLIERS_SIZE = 4; // removing outliers
 // dark-background image is in the slice. Close the orignal PM. Rename new PM.
 
 
-inputDirectory = getDirectory("Choose a Directory");
+inputDirectory = getDirectory("Select your folder of images");
 inputFileList = getFileList(inputDirectory);
 inputFileList = removeNonImages(inputFileList);
 
 for (eachImage = 0; eachImage < lengthOf(inputFileList); eachImage++) {
+    call("java.lang.System.gc"); // garbage collection cleans RAM
     open(inputFileList[eachImage]);
     FILENAME = getInfo("image.filename"); // this is the original file name of the opened file
     NAME_NO_EXT = File.nameWithoutExtension; // file name without extension
@@ -41,7 +42,7 @@ for (eachImage = 0; eachImage < lengthOf(inputFileList); eachImage++) {
 
 
 function doTheThing() {
-    print("working on " + FILENAME);
+    print("working on " + FILENAME) + getFormattedTime();
     // Duplicate the original PM; new working file is DuplicatePM, original file is the var filename
     run("Duplicate...", "duplicate");
     rename("Duplicate");
@@ -202,3 +203,16 @@ function removeNonImages(array) {
   }
   return array;
 } // returns the cleaned array
+
+
+function getFormattedTime() {
+   getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+   TimeString = "\nTime: ";
+   if (hour<10) {TimeString = TimeString+"0";}
+   TimeString = TimeString+hour+":";
+   if (minute<10) {TimeString = TimeString+"0";}
+   TimeString = TimeString+minute+":";
+   if (second<10) {TimeString = TimeString+"0";}
+   TimeString = TimeString+second;
+   return TimeString;
+}
