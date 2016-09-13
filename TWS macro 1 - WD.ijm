@@ -96,12 +96,18 @@ function doTheThing() {
     //run("Concatenate...", "  title=[overlaid] image1=[all da masks] image2=["+filename+"]");
 
     run("Merge Channels...", "  title=[Overlay] c1=[CombinedMasks] c2=[OG] create");
-
+    closeAllWindows();
 
 }
 
 
 
+function closeAllWindows() {
+      while (nImages>0) {
+          selectImage(nImages);
+          close();
+      }
+  }
 
 
 /* =====================================================
