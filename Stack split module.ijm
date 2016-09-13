@@ -60,10 +60,6 @@ function restackImages() {
     }
 }
 
-function parseSlicePrefix(str) {
-    split(str, "_")
-}
-
 function chooseClassifiers() {
     Dialog.create("Step 1. ")
     Dialog.addNumber("How many channels? ", 3);
@@ -81,22 +77,20 @@ function chooseClassifiers() {
 
 
 function splitAndSave() {
-    for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
-        print("Trying to open... "+inputFileList[eachImage]);
-        open(inputFileList[eachImage]);
-        run("Stack Splitter", "number="+nSlices); // outputs as slice000x_FILENAME
-        listOpenImages = getListOpenImages();
-        Array.print(listOpenImages);
-        for (openImages=0; openImages < lengthOf(listOpenImages); openImages++) {
-            selectWindow(listOpenImages[openImages]);
-            print(listOpenImages[openImages]);
-            if (startsWith(getTitle(), "slice000") == true) {
-                saveAs("tif", inputDirectory+"\\Split Temp 1\\"+getTitle());
-                print("found a match, saving");
-                close();
-            }
-            else {print("not a match"); close();}
+    open(inputFileList[eachImage]);
+    run("Stack Splitter", "number="+nSlices); // outputs as slice000x_FILENAME
+    listOpenImages = getListOpenImages();
+    Array.print(listOpenImages);
+    for (openImages=0; openImages < lengthOf(listOpenImages); openImages++) {
+        selectWindow(listOpenImages[openImages]);
+        print(listOpenImages[openImages]);
+        if (startsWith(getTitle(), "slice000") == true) {
+            saveAs("tif", inputDirectory+"\\Split Temp 1\\"+getTitle());
+            print("found a match, saving");
+            close();
         }
+        else {print("not a match"); close();}
+
     }
 }
 

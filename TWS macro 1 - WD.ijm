@@ -20,14 +20,6 @@ OUTLIERS_SIZE = 4; // removing outliers
 // Call the batch function with a command
 
 
-
-
-// Process the probability map (PM)
-
-// Open the image and dupilicate the slice so that only the
-// dark-background image is in the slice. Close the orignal PM. Rename new PM.
-
-
 inputDirectory = getDirectory("Select your folder of images");
 inputFileList = getFileList(inputDirectory);
 inputFileList = excludeNonImages(inputFileList);
