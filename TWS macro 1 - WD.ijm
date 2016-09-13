@@ -6,14 +6,13 @@ for each channel and counts the overlap.
 */
 
 // Variables and constants, change these CAPITALIZED parameters to fit your image resolution and stuff
-setBatchMode(false);
-FILENAME = getInfo("image.filename"); // this is the original file name of the opened fileMASK_ENLARGE = 5; // this is how big your cell masks will be
-NAME_NO_EXT = File.nameWithoutExtension; // file name without extension
+setBatchMode(true);
+MASK_ENLARGE = 5; // this is how big your cell masks will be
 MASK_MAXIMA = 50; // this is the noise tolerance for Finding Maxima
 EXCLUSION_SIZE = 40; // everything under this many pixels is excluded in mask
 EXCLUSION_CIRC = 0.30; // everything under this circularity is excluded in mask
 OUTLIERS_SIZE = 4; // removing outliers
-maskNameArray = newArray(nSlices);
+//maskNameArray = newArray(nSlices);
 
 
 // Open the TWS and make the probability map
@@ -29,63 +28,77 @@ maskNameArray = newArray(nSlices);
 // dark-background image is in the slice. Close the orignal PM. Rename new PM.
 
 
+inputDirectory = getDirectory("Choose a Directory");
+inputFileList = getFileList(inputDirectory);
+inputFileList = removeNonImages(inputFileList);
+
+for (eachImage = 0; eachImage < lengthOf(inputFileList); eachImage++) {
+    open(inputFileList[eachImage]);
+    FILENAME = getInfo("image.filename"); // this is the original file name of the opened file
+    NAME_NO_EXT = File.nameWithoutExtension; // file name without extension
+    doTheThing();
+}
 
 
-// Duplicate the original PM; new working file is DuplicatePM, original file is the var filename
-run("Duplicate...", "duplicate");
-rename("Duplicate");
+function doTheThing() {
+    print("working on " + FILENAME);
+    // Duplicate the original PM; new working file is DuplicatePM, original file is the var filename
+    run("Duplicate...", "duplicate");
+    rename("Duplicate");
 
-// Process the image binary
-// results in Binary_Duplicate
-processImageBinary(OUTLIERS_SIZE, EXCLUSION_SIZE, EXCLUSION_CIRC);
+    // Process the image binary
+    // results in Binary_Duplicate
+    processImageBinary(OUTLIERS_SIZE, EXCLUSION_SIZE, EXCLUSION_CIRC);
 
-// Create masks for each slice in the processed binary, passed with these mask parameters
-createMasksForEachSlice(MASK_ENLARGE, MASK_MAXIMA);
-
-
-// Create new original intersection
-selectWindow(FILENAME);
-run("Stack Splitter", "number="+nSlices);
-// images as slice000x_FILENAME
-
-intersect("slice0002_"+FILENAME, "slice0003_"+FILENAME);
-print("intersected 1");
-rename("sliceOL23_"+NAME_NO_EXT);
-run("Images to Stack", "method=[Copy (center)] name=[OG] title=slice use");
-
-// Create mask intersection
-intersect("Mask-2", "Mask-3")
-rename("Mask-OL23")
-
-// Concatenate all the masks to analyze for overlap, then save.
-run("Concatenate...", "  title=[CombinedMasks] image1=Mask-1 image2=Mask-2 image3=Mask-3 image4=Mask-OL23 create");
-
-// save the real channel masks to compare to the original image
-selectWindow("CombinedMasks");
-run("Duplicate...", "duplicate");
-rename("CombinedMasksDuplicate");
-setSlice(4);
-run("Delete Slice");
-selectWindow(FILENAME);
-saveWhatAsWhere("CombinedMasksDuplicate", "tif", getInfo("image.directory")+"\\toCompareToOrig_"+FILENAME);
-close();
-
-// save all the masks into one file
-selectWindow("CombinedMasks");
-run("Duplicate...", "duplicate");
-rename("CombinedMasksDuplicate");
-selectWindow(FILENAME); // you have to select this otherwise you can't grab the image directory
-saveWhatAsWhere("CombinedMasksDuplicate", "tif", getInfo("image.directory")+"\\allMasks_"+FILENAME);
-close();
-
-// Save the combined masks
-selectWindow("CombinedMasks");
+    // Create masks for each slice in the processed binary, passed with these mask parameters
+    createMasksForEachSlice(MASK_ENLARGE, MASK_MAXIMA);
 
 
-// Overlay the masks onto the orignial channels, then save.
-//run("Concatenate...", "  title=[overlaid] image1=[all da masks] image2=["+filename+"]");
+    // Create new original intersection
+    selectWindow(FILENAME);
+    run("Stack Splitter", "number="+nSlices);
+    // images as slice000x_FILENAME
 
-run("Merge Channels...", "  title=[Overlay] c1=[CombinedMasks] c2=[OG] create");
+    intersect("slice0002_"+FILENAME, "slice0003_"+FILENAME);
+    print("intersected 1");
+    rename("sliceOL23_"+NAME_NO_EXT);
+    run("Images to Stack", "method=[Copy (center)] name=[OG] title=slice use");
+
+    // Create mask intersection
+    intersect("Mask-2", "Mask-3");
+    rename("Mask-OL23");
+
+    // Concatenate all the masks to analyze for overlap, then save.
+    run("Concatenate...", "  title=[CombinedMasks] image1=Mask-1 image2=Mask-2 image3=Mask-3 image4=Mask-OL23 create");
+
+    // save the real channel masks to compare to the original image
+    selectWindow("CombinedMasks");
+    run("Duplicate...", "duplicate");
+    rename("CombinedMasksDuplicate");
+    setSlice(4);
+    run("Delete Slice");
+    selectWindow(FILENAME);
+    saveWhatAsWhere("CombinedMasksDuplicate", "tif", getInfo("image.directory")+"\\toCompareToOrig_"+FILENAME);
+    close();
+
+    // save all the masks into one file
+    selectWindow("CombinedMasks");
+    run("Duplicate...", "duplicate");
+    rename("CombinedMasksDuplicate");
+    selectWindow(FILENAME); // you have to select this otherwise you can't grab the image directory
+    saveWhatAsWhere("CombinedMasksDuplicate", "tif", getInfo("image.directory")+"\\allMasks_"+FILENAME);
+    close();
+
+    // Save the combined masks
+    selectWindow("CombinedMasks");
+
+    // Overlay the masks onto the orignial channels, then save.
+    //run("Concatenate...", "  title=[overlaid] image1=[all da masks] image2=["+filename+"]");
+
+    run("Merge Channels...", "  title=[Overlay] c1=[CombinedMasks] c2=[OG] create");
+
+
+}
 
 
 
@@ -158,4 +171,28 @@ function saveWhatAsWhere(what, as, where) {
   saveAs(as, where);
 }
 
- // end function createMasksForEachSlice()
+
+function isImage(filename) {
+ extensions = newArray("tif", "tiff", "jpg", "bmp");
+ result = false;
+ for (i=0; i<extensions.length; i++) {
+   if (endsWith(toLowerCase(filename), "." + extensions[i])) {
+     result = true;
+   }
+ }
+ return result;
+}
+
+function removeNonImages(array) {
+  for (i = 0; i < lengthOf(array); i++) {
+    // User-defined function: isImage(filename), checks if it's an image
+    if (isImage(array[i]) == false) {
+      // Create two slices of the array flanking the desired removee
+      concat1 = Array.slice(array, 0, i);
+      concat2 = Array.slice(array, i+1, array.length);
+      // Create a new array that excludes the removee
+      array = Array.concat(concat1, concat2);
+    }
+  }
+  return array;
+} // returns the cleaned array

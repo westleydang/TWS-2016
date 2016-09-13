@@ -39,7 +39,7 @@ function isImage(filename) {
 function removeNonImages(array) {
   for (i = 0; i < lengthOf(array); i++) {
     // User-defined function: isImage(filename), checks if it's an image
-    if (isImage(arrayFileList[i]) == false) {
+    if (isImage(array[i]) == false) {
       // Create two slices of the array flanking the desired removee
       concat1 = Array.slice(array, 0, i);
       concat2 = Array.slice(array, i+1, array.length);

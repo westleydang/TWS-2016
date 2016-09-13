@@ -22,7 +22,7 @@ roiFilePath = File.openDialog("Choose the ROI set:");
 // Load the ROI
 roiManager("reset");
 roiManager("open", roiFilePath);
-// User defined function makes an array as big as the ROI manager
+// User defined function roiAsArray() makes an array as big as the ROI manager
 // then imports all the names to an array
 arrayROIImportedNames = newArray(roiManager("count"));
 arrayROIImportedNames = roiAsArray(arrayROIImportedNames);
@@ -31,26 +31,29 @@ arrayROIImportedNames = roiAsArray(arrayROIImportedNames);
 for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
     // Open each image
     open(inputDirectory+arrayFileList[eachImage]);
-    arrayMatching = newArray();
+    crossref = newArray();
     // Check if the image has any corresponding ROIs in the entire array
     for (check = 0; check < lengthOf(arrayROIImportedNames); check++) {
-        // If yes, then make add to the array that it identifies with
+        // If yes, then make add to the list of ROIs to count
         print("ends " + endsWith(arrayROIImportedNames[check], arrayFileList[eachImage]));
         print("starts " + startsWith(arrayROIImportedNames[check], "SKIP"));
 
         if (endsWith(arrayROIImportedNames[check], arrayFileList[eachImage]) == true
             && startsWith(arrayROIImportedNames[check], "SKIP") == false) {
-                arrayMatching = Array.concat(arrayMatching, check);
+                crossref = Array.concat(crossref, check);
         }
     }
-    Array.print(arrayMatching);
-    // Count at that image for each ROI given by the index at arrayMatching
-    for (applicableROI = 0; applicableROI < lengthOf(arrayMatching); applicableROI++) {
-        roiManager("Select", arrayMatching[applicableROI]);
+    Array.print(crossref);
+    // Count at that image for each ROI given by the index at crossref
+    for (applicableROI = 0; applicableROI < lengthOf(crossref); applicableROI++) {
+        roiManager("Select", crossref[applicableROI]);
         run("Measure");
-
     }
     // Save to the results
+    tableName = "" ;
+    run("New... ", "name="+tableName+" type=Table");
+    print(tableName, "\\Headings:[File Name]	[ROI]	[ROI Area]	[Ch1 Count]	[Ch2 Count]	[Ch3 Count]	[Ch2-3 OL Count]");
+
 }
 
 function roiAsArray(array) {
