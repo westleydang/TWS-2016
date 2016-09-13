@@ -30,7 +30,7 @@ OUTLIERS_SIZE = 4; // removing outliers
 
 inputDirectory = getDirectory("Select your folder of images");
 inputFileList = getFileList(inputDirectory);
-inputFileList = removeNonImages(inputFileList);
+inputFileList = excludeNonImages(inputFileList);
 
 for (eachImage = 0; eachImage < lengthOf(inputFileList); eachImage++) {
     call("java.lang.System.gc"); // garbage collection cleans RAM
@@ -190,7 +190,7 @@ function isImage(filename) {
  return result;
 }
 
-function removeNonImages(array) {
+function excludeNonImages(array) {
   for (i = 0; i < lengthOf(array); i++) {
     // User-defined function: isImage(filename), checks if it's an image
     if (isImage(array[i]) == false) {
