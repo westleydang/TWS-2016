@@ -91,13 +91,6 @@ for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
 
 
 
-/*
-  selectWindow("Classification result");
-  rename("result of "+inputFileList[currentFile]);
-  selectWindow("\\"+inputFileList[currentFile]);
-  close();
-*/
-
 
 print("*** DONE WITH MACRO");
 
