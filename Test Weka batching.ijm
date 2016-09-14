@@ -77,14 +77,11 @@ for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
             inputDirectory+"Split Temp 1", tempList1[eachSplit],
             "showResults=false", "storeResults=true","probabilityMaps=false",
             inputDirectory+"Split Temp 2");
-
-
+        // Deletes the temp channels because we don't need it any more
         print("Deleting... "+ inputDirectory+"Split Temp 1\\"+tempList1[eachSplit]);
         File.delete(inputDirectory+"Split Temp 1\\"+tempList1[eachSplit]);
         print("***    done classifying  "+ tempList1[eachSplit]);
     }
-    print("waiting 2000");
-    wait(2000);
 
     restackImages();
 }
