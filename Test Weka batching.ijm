@@ -38,7 +38,7 @@ File.makeDirectory(inputDirectory+"\\Classifiers\\");
 //inputDirectory = replace(inputDirectory, "\\", "/");
 //outputDirectory = replace(outputDirectory, "\\", "/");
 
-setBatchMode(false);
+setBatchMode(true);
 inputFileList = getFileList(inputDirectory);
 inputFileList = excludeNonImages(inputFileList);
 
@@ -48,6 +48,11 @@ print("*****I sense "+inputFileList.length+" files");
 classifierArray = chooseClassifiers();
 print("Here are the classifiers: ");
 Array.print(classifierArray);
+
+
+    newImage("Dummy", "8-bit black", 2,2,1);
+    run("Trainable Weka Segmentation");
+
 
 for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
     // Split the channels into sep images in subfolder
@@ -59,8 +64,6 @@ for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
     print("Here is the tempList1: ");
     Array.print(tempList1);
 
-    newImage("Dummy", "8-bit black", 1,1,1);
-    run("Trainable Weka Segmentation");
 
     // For each channel/image , WEKA and then save each classified image
     for (eachSplit = 0; eachSplit < lengthOf(tempList1); eachSplit++) {
@@ -68,6 +71,7 @@ for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
         selectWindow("Trainable Weka Segmentation v3.1.0");
         // Load the appropriate classifier
         // classifierArray is sorted, and so is tempList1
+        // THERE IS ALWAYS A FUCKING ERROR HERE (BELOW)
         call("trainableSegmentation.Weka_Segmentation.loadClassifier", classifierArray[eachSplit]);
 
         // Applies to image file from Split Temp 1 where the split files are
@@ -84,6 +88,9 @@ for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
     }
 
     restackImages();
+    call("java.lang.System.gc");
+    call("java.lang.System.gc");
+    call("java.lang.System.gc");
 }
 
 
@@ -143,9 +150,9 @@ function splitAndSave(img) {
             print("found a match, saving");
             close();
         }
-        else {print("not a match"); }
+        else {print("not a match");  }
     }
-    closeAllWindows();
+
     print("done split and save");
 }
 
