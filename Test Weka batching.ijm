@@ -44,35 +44,48 @@ inputFileList = excludeNonImages(inputFileList);
 
 print("*****I sense "+inputFileList.length+" files");
 
-
-
-// Run the TWS
-// Ask user for the classifier, then load it
+// Ask the user to choose classifiers, save to array
 classifierArray = chooseClassifiers();
-tempList1 = getFileList(inputDirectory+"\\Split Temp 1\\");
-tempList1 = Array.sort(tempList1);
-
-
+print("Here are the classifiers: ");
+Array.print(classifierArray);
 
 for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
+    // Split the channels into sep images in subfolder
+    print("split and saving.. "+ inputDirectory+inputFileList[eachImage]);
     splitAndSave(inputDirectory+inputFileList[eachImage]);
+
+    tempList1 = getFileList(inputDirectory+"Split Temp 1");
+    tempList1 = Array.sort(tempList1);
+    print("Here is the tempList1: ");
+    Array.print(tempList1);
 
     newImage("Dummy", "8-bit black", 1,1,1);
     run("Trainable Weka Segmentation");
+
+    // For each channel/image , WEKA and then save each classified image
     for (eachSplit = 0; eachSplit < lengthOf(tempList1); eachSplit++) {
         print(classifierArray[eachSplit]);
         selectWindow("Trainable Weka Segmentation v3.1.0");
+        // Load the appropriate classifier
+        // classifierArray is sorted, and so is tempList1
         call("trainableSegmentation.Weka_Segmentation.loadClassifier", classifierArray[eachSplit]);
+
         // Applies to image file from Split Temp 1 where the split files are
         // Stores in Split Temp 2
         print("Trying to apply... "+ tempList1[eachSplit]);
-        call("trainableSegmentation.Weka_Segmentation.applyClassifier", inputDirectory+"\\Split Temp 1\\",
-          tempList1[eachSplit], "showResults=false", "storeResults=true",
-          "probabilityMaps=false", inputDirectory+"\\Split Temp 2");
+        call("trainableSegmentation.Weka_Segmentation.applyClassifier",
+            inputDirectory+"Split Temp 1", tempList1[eachSplit],
+            "showResults=false", "storeResults=true","probabilityMaps=false",
+            inputDirectory+"Split Temp 2");
 
-        File.delete(inputDirectory+"\\Split Temp 1\\"+tempList1[eachSplit]);
+
+        print("Deleting... "+ inputDirectory+"Split Temp 1\\"+tempList1[eachSplit]);
+        File.delete(inputDirectory+"Split Temp 1\\"+tempList1[eachSplit]);
         print("***    done classifying  "+ tempList1[eachSplit]);
     }
+    print("waiting 2000");
+    wait(2000);
+
     restackImages();
 }
 
@@ -107,21 +120,22 @@ function getListOpenImages() {
 
 
 function restackImages() {
-    tempArray2 = getFileList(inputDirectory+"\\Split Temp 2\\");
+    tempArray2 = getFileList(inputDirectory+"Split Temp 2");
+    print("here is tempArray2");
     Array.print(tempArray2);
     for (eachImage = 0; eachImage < lengthOf(tempArray2); eachImage++) {
         print(tempArray2[eachImage]);
-        open(inputDirectory+"\\Split Temp 2\\"+tempArray2[eachImage]);
+        open(inputDirectory+"Split Temp 2\\"+tempArray2[eachImage]);
     }
     run("Images to Stack", "method=[Copy (center)] name=[og] title=slice000 use");
     selectWindow("og");
 
     // Parses out the original file name from the first sliced image
     origFilename = substring(tempArray2[0], 10, lengthOf(tempArray2[0]));
-    saveAs("tif", inputDirectory+"\\Weka Output\\"+origFilename);
+    saveAs("tif", inputDirectory+"Weka Output\\"+origFilename);
     close();
     for (eachImage = 0; eachImage < lengthOf(tempArray2); eachImage++) {
-        File.delete(inputDirectory+"\\Split Temp 2\\"+tempArray2[eachImage]);
+        File.delete(inputDirectory+"Split Temp 2\\"+tempArray2[eachImage]);
     }
 }
 
@@ -135,13 +149,14 @@ function splitAndSave(img) {
         selectWindow(listOpenImages[openImages]);
         print(listOpenImages[openImages]);
         if (startsWith(getTitle(), "slice000") == true) {
-            saveAs("tif", inputDirectory+"\\Split Temp 1\\"+getTitle());
+            saveAs("tif", inputDirectory+"Split Temp 1\\"+getTitle());
             print("found a match, saving");
             close();
         }
         else {print("not a match"); }
     }
     closeAllWindows();
+    print("done split and save");
 }
 
 function chooseClassifiers() {
