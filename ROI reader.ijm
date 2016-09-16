@@ -5,6 +5,8 @@
 
 */
 
+
+
 // I don't know why, but the ROI manager fucks up without an open image
 newImage("Untitled", "8-bit black", 1, 1, 1);
 
@@ -13,14 +15,13 @@ inputDirectory = getDirectory("Choose a Directory");
 arrayFileList = getFileList(inputDirectory);
 arrayFileList = removeNonImages(arrayFileList);
 
+Array.print(arrayFileList);
 // Ask user to select the ROI
 roiFilePath = File.openDialog("Choose the ROI set:");
 
 // Load the ROI
 roiManager("reset");
 roiManager("open", roiFilePath);
-selectWindow("Untitled");
-close();
 
 
 // User defined function roiAsArray() makes an array as big as the ROI manager
@@ -34,6 +35,7 @@ resultsName = newArray();
 resultsCount = newArray();
 resultsFilename = "Measurements from "+getFormattedDate();
 
+setBatchMode(false);
 // For each image
 for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
     // Open each image
