@@ -103,11 +103,11 @@ function drawROI() {
       if (selectionType() == (-1)) {
         run("Select All");
         roiManager("Add");
-        currentName = "SKIP"+"_i"+currentIndex+"_"+arrayFileList[eachImage];
+        currentName = "SKIP"+"]]"+currentIndex+"]]"+arrayFileList[eachImage];
       }
       else {
         roiManager("Add");
-        currentName = arrayROILabels[eachROI]+"_i"+currentIndex+"__"+arrayFileList[eachImage];
+        currentName = arrayROILabels[eachROI]+"]]"+currentIndex+"]]"+arrayFileList[eachImage];
       }
       // rename it as, ex: CA1_i34_filename
       roiManager("Select", currentIndex);

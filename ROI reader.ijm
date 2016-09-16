@@ -3,9 +3,6 @@
 - Parses the array into index and ROI label and file names
 - reads according to the file names
 
-All ROI names are formatted as:
-ROI label _i index __ filename
-
 */
 
 // I don't know why, but the ROI manager fucks up without an open image
@@ -22,40 +19,78 @@ roiFilePath = File.openDialog("Choose the ROI set:");
 // Load the ROI
 roiManager("reset");
 roiManager("open", roiFilePath);
+selectWindow("Untitled");
+close();
+
+
 // User defined function roiAsArray() makes an array as big as the ROI manager
 // then imports all the names to an array
 arrayROIImportedNames = newArray(roiManager("count"));
 arrayROIImportedNames = roiAsArray(arrayROIImportedNames);
 
+resultsChannel = newArray();
+resultsRegion = newArray();
+resultsName = newArray();
+resultsCount = newArray();
+resultsFilename = "Measurements from "+getFormattedDate();
 
+// For each image
 for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
     // Open each image
     open(inputDirectory+arrayFileList[eachImage]);
-    crossrefTrue = newArray();
     // Check if the image has any corresponding ROIs in the entire array
-    for (check = 0; check < lengthOf(arrayROIImportedNames); check++) {
-        // If yes, then make add to the list of ROIs to count
-        print("file match " + endsWith(arrayROIImportedNames[check], arrayFileList[eachImage]));
-        print("skip " + startsWith(arrayROIImportedNames[check], "SKIP"));
-
-        if (endsWith(arrayROIImportedNames[check], arrayFileList[eachImage]) == true
-            && startsWith(arrayROIImportedNames[check], "SKIP") == false) {
-                crossrefTrue = Array.concat(crossrefTrue, check);
-        }
-    }
+    // Returns new array of non-skipped pointers
+    crossrefTrue = getNonSkippedROI(arrayROIImportedNames);
     Array.print(crossrefTrue);
+
     // Count at that image for each ROI given by the index in crossref
+    // For each non-skipped ROI
     for (i = 0; i < lengthOf(crossrefTrue); i++) {
         roiManager("Select", crossrefTrue[i]);
-        run("Measure");
+        print("ROI is "+Roi.getName());
+        parsedName = split(Roi.getName(), "]]");
+        Array.print(parsedName);
+        // parsedName[0] should be the region
+        // parsedName[1] should be the index
+        // parsedName[2] should be the file name
+
+        // For each slice
+        for(slice = 0; slice < nSlices; slice++) {
+            setSlice(slice+1);
+            run("Measure");
+            run("Find Maxima...", "noise=0 output=[Count]");
+            resultsName = Array.concat(resultsName, parsedName[2]);
+            resultsRegion = Array.concat(resultsRegion, parsedName[0]);
+            resultsChannel = Array.concat(resultsChannel, (slice+1));
+            resultsCount = Array.concat(resultsCount, getResult("Count"));
+        }
     }
-    // Save to the results
-    //tableName = "" ;
-    //run("New... ", "name="+tableName+" type=Table");
-    //print(tableName, "\\Headings:[File Name]	[ROI]	[ROI Area]	[Ch1 Count]	[Ch2 Count]	[Ch3 Count]	[Ch2-3 OL Count]");
-    selectWindow(arrayFileList[eachImage]);
-    close();
 }
+
+Array.show(resultsFilename, resultsName, resultsRegion, resultsChannel, resultsCount);
+selectWindow(resultsFilename);
+saveAs(resultsFilename, inputDirectory+resultsFilename+".csv");
+close();
+closeAllImages();
+
+/* =====================================================
+End of macro. Library of functions are below.
+=======================================================*/
+function getNonSkippedROI(roiList) {
+    array = newArray();
+    for (check = 0; check < lengthOf(roiList); check++) {
+        // If yes, then make add to the list of ROIs to count
+        print("file match " + endsWith(roiList[check], arrayFileList[eachImage]));
+        print("skip " + startsWith(roiList[check], "SKIP"));
+
+        if (endsWith(roiList[check], arrayFileList[eachImage]) == true
+            && startsWith(roiList[check], "SKIP") == false) {
+                array = Array.concat(array, check);
+        }
+    }
+    return array;
+}
+
 
 function roiAsArray(array) {
     for (each = 0; each < roiManager("count"); each++) {
@@ -90,3 +125,31 @@ function removeNonImages(array) {
   }
   return array;
 } // returns the cleaned array
+
+
+function closeAllImages() {
+    list = getListOpenImages();
+    for (i=0; i <nImages; i++) {
+        selectImage(i+1);
+        if (isImage(list[i]) == true) {
+            close();
+        }
+    }
+}
+
+function getListOpenImages() {
+    list = newArray(nImages);
+    for (i=0; i <nImages; i++) {
+        if (isImage(list[i]) == true) {
+            selectImage(i+1);
+            list[i] = getTitle();
+        }
+    }
+    return list;
+}
+function getFormattedDate() {
+	 getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+     MonthNames = newArray("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
+     resultDate = ""+dayOfMonth+"-"+MonthNames[month]+"-"+year;
+     return resultDate;
+}
