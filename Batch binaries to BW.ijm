@@ -27,3 +27,9 @@ for (currentCaterpillar = 0; currentCaterpillar < toTransformList.length; curren
   saveAs("tif", outTransformDir+"\\"+toTransformList[currentCaterpillar]);
   close();
 }
+
+
+    call("java.lang.System.gc");
+    call("java.lang.System.gc");
+    call("java.lang.System.gc");
+
