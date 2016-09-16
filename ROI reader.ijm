@@ -65,13 +65,15 @@ for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
             resultsCount = Array.concat(resultsCount, getResult("Count"));
         }
     }
+    selectWindow(arrayFileList[eachImage]);
+    close();
+    call("java.lang.System.gc"); // garbage collection cleans RAM
 }
 
 Array.show(resultsFilename, resultsName, resultsRegion, resultsChannel, resultsCount);
 selectWindow(resultsFilename);
 saveAs(resultsFilename, inputDirectory+resultsFilename+".csv");
 close();
-closeAllImages();
 
 /* =====================================================
 End of macro. Library of functions are below.
