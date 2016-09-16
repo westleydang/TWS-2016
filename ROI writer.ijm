@@ -17,13 +17,53 @@ numberofROI = askHowManyROI(); // returns numberofROI
 arrayROILabels = newArray(numberofROI);
 askForROILabels(arrayROILabels);
 
-// Draw ROI for each image
-drawROI();
+arrayFileList = getFileList(inputDirectory); // returns array
+// Remove non images from the array
+arrayFileList = removeNonImages(arrayFileList);
+
+run("ROI Manager...");
+roiManager("reset");
+
+arrayROIIndex = newArray(numberofROI * lengthOf(arrayFileList));
+arrayROINames = newArray(numberofROI * lengthOf(arrayFileList));
+
+for (eachImage = 0; eachImage < (lengthOf(arrayFileList)); eachImage++) {
+    open(inputDirectory + arrayFileList[eachImage]);
+    for (eachROI = 0; eachROI < numberofROI; eachROI++) {
+      selectWindow(arrayFileList[eachImage]);
+      run("Select None");
+      setTool("polygon");
+
+      waitForUser("Draw "+arrayROILabels[eachROI]+" -- then click OK");
+
+      // because you can only select ROI by index:
+      currentIndex = ((eachImage*numberofROI)+eachROI);
+      // If no selection, then tag for skipping
+      if (selectionType() == (-1)) {
+        run("Select All");
+        roiManager("Add");
+        currentName = "SKIP"+"]]"+currentIndex+"]]"+arrayFileList[eachImage];
+      }
+      else {
+        roiManager("Add");
+        currentName = arrayROILabels[eachROI]+"]]"+currentIndex+"]]"+arrayFileList[eachImage];
+      }
+      // rename it as, ex: CA1]]i34]]filename
+      roiManager("Select", currentIndex);
+      roiManager("rename", currentName);
+      arrayROIIndex[currentIndex] = currentIndex;
+      arrayROINames[currentIndex] = currentName;
+    } // finish for each ROI
+
+    // save then close image
+    roiManager("save", inputDirectory+getFormattedDate()+"_ROIset.zip");
+    close(arrayFileList[eachImage]);
+}
+call("java.lang.System.gc"); // garbage collection cleans RAM
 
 /*
 ============================FUNCTION LIBRARIES BELOW============================
 */
-
 
 function isImage(filename) {
  extensions = newArray("tif", "tiff", "jpg", "bmp");
@@ -72,56 +112,6 @@ function askForROILabels(a) {
 	}
 }
 
-
-function drawROI() {
-  arrayFileList = getFileList(inputDirectory); // returns array
-  // Remove non images from the array
-  arrayFileList = removeNonImages(arrayFileList);
-  arrayROIIndex = newArray(numberofROI * lengthOf(arrayFileList));
-  arrayROINames = newArray(numberofROI * lengthOf(arrayFileList));
-
-  run("ROI Manager...");
-  roiManager("reset");
-
-  for (eachImage = 0; eachImage < (lengthOf(arrayFileList)); eachImage++) {
-    // open the image
-    open(inputDirectory+arrayFileList[eachImage]);
-
-    print(File.getName(arrayFileList[eachImage]));
-    print(File.getParent(arrayFileList[eachImage]));
-
-    for (eachROI = 0; eachROI < numberofROI; eachROI++) {
-      selectWindow(arrayFileList[eachImage]);
-      run("Select None");
-      setTool("polygon");
-
-      waitForUser("Draw "+arrayROILabels[eachROI]+" -- then click OK");
-
-      // because you can only select by index:
-      currentIndex = ((eachImage*numberofROI)+eachROI);
-      // If no selection, then tag for skipping
-      if (selectionType() == (-1)) {
-        run("Select All");
-        roiManager("Add");
-        currentName = "SKIP"+"]]"+currentIndex+"]]"+arrayFileList[eachImage];
-      }
-      else {
-        roiManager("Add");
-        currentName = arrayROILabels[eachROI]+"]]"+currentIndex+"]]"+arrayFileList[eachImage];
-      }
-      // rename it as, ex: CA1_i34_filename
-      roiManager("Select", currentIndex);
-      roiManager("rename", currentName);
-      arrayROIIndex[currentIndex] = currentIndex;
-      arrayROINames[currentIndex] = currentName;
-    } // finish for each ROI
-
-    // save then close image
-    roiManager("save", inputDirectory+getFormattedDate()+"_ROIset.zip");
-    close(arrayFileList[eachImage]);
-  } // finish for each image
-
-} // finish drawROI function
 
 function getFormattedDate() {
 	 getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);

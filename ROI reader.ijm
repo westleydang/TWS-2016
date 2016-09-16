@@ -5,8 +5,6 @@
 
 */
 
-
-
 // I don't know why, but the ROI manager fucks up without an open image
 newImage("Untitled", "8-bit black", 1, 1, 1);
 
@@ -35,17 +33,16 @@ resultsName = newArray();
 resultsCount = newArray();
 resultsFilename = "Measurements from "+getFormattedDate();
 
-setBatchMode(false);
+setBatchMode(true);
 // For each image
 for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
-    // Open each image
-    open(inputDirectory+arrayFileList[eachImage]);
-    // Check if the image has any corresponding ROIs in the entire array
-    // Returns new array of non-skipped pointers
-    crossrefTrue = getNonSkippedROI(arrayROIImportedNames);
+    // For the specified image passed in, check if the
+    // image has any corresponding ROIs in the entire array,
+    // then eturns new array of non-skipped pointers
+    crossrefTrue = getNonSkippedROI(arrayFileList[eachImage], arrayROIImportedNames);
     Array.print(crossrefTrue);
 
-    // Count at that image for each ROI given by the index in crossref
+    // Count at that image for each ROI given by the index in crossrefTrue
     // For each non-skipped ROI
     for (i = 0; i < lengthOf(crossrefTrue); i++) {
         roiManager("Select", crossrefTrue[i]);
@@ -73,6 +70,7 @@ for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
 }
 
 Array.show(resultsFilename, resultsName, resultsRegion, resultsChannel, resultsCount);
+
 selectWindow(resultsFilename);
 saveAs(resultsFilename, inputDirectory+resultsFilename+".csv");
 close();
@@ -80,14 +78,21 @@ close();
 /* =====================================================
 End of macro. Library of functions are below.
 =======================================================*/
-function getNonSkippedROI(roiList) {
+/*
+Passes in the array of ROI names, and then crossreferences the passed image
+to find the ROI names that correspond to that image. Then checks for which
+regions to skip, and then returns an array of all the non-skipped regions.
+*/
+function getNonSkippedROI(img, roiList) {
     array = newArray();
+    // Open the image
+    open(inputDirectory+img);
     for (check = 0; check < lengthOf(roiList); check++) {
         // If yes, then make add to the list of ROIs to count
-        print("file match " + endsWith(roiList[check], arrayFileList[eachImage]));
+        print("file match " + endsWith(roiList[check], img));
         print("skip " + startsWith(roiList[check], "SKIP"));
 
-        if (endsWith(roiList[check], arrayFileList[eachImage]) == true
+        if (endsWith(roiList[check], img) == true
             && startsWith(roiList[check], "SKIP") == false) {
                 array = Array.concat(array, check);
         }
@@ -129,7 +134,6 @@ function removeNonImages(array) {
   }
   return array;
 } // returns the cleaned array
-
 
 function closeAllImages() {
     list = getListOpenImages();
