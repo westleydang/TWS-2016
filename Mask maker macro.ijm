@@ -112,17 +112,17 @@ function processImageBinary(img, radiusExclusion, sizeExclusion, circExclusion) 
 
   // Clean the image by filling in the holes and removing noise.
   // this file is called "<filename>"
-  run("Remove Outliers...", "radius=2 threshold=1 which=Bright stack");
   run("Watershed", "stack");
-  for (i=0; i<1; i++) {
+  for (i=0; i<2; i++) {
+      run("Remove Outliers...", "radius=1 threshold=1 which=Bright stack");
       run("Dilate", "stack");
       run("Fill Holes", "stack");
       run("Erode", "stack");
       run("Watershed", "stack");
   }
+  run("Remove Outliers...", "radius="+radiusExclusion+" threshold=1 which=Bright stack");
   run("Dilate", "stack");
   run("Watershed", "stack");
-  run("Remove Outliers...", "radius="+radiusExclusion+" threshold=1 which=Bright stack");
 
   // Make new mask that excludes small and non circular particles
   // this file is called "Mask of <filename>"
