@@ -31,29 +31,30 @@ arrayROIImportedNames = roiAsArray(arrayROIImportedNames);
 for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
     // Open each image
     open(inputDirectory+arrayFileList[eachImage]);
-    crossref = newArray();
+    crossrefTrue = newArray();
     // Check if the image has any corresponding ROIs in the entire array
     for (check = 0; check < lengthOf(arrayROIImportedNames); check++) {
         // If yes, then make add to the list of ROIs to count
-        print("ends " + endsWith(arrayROIImportedNames[check], arrayFileList[eachImage]));
-        print("starts " + startsWith(arrayROIImportedNames[check], "SKIP"));
+        print("file match " + endsWith(arrayROIImportedNames[check], arrayFileList[eachImage]));
+        print("skip " + startsWith(arrayROIImportedNames[check], "SKIP"));
 
         if (endsWith(arrayROIImportedNames[check], arrayFileList[eachImage]) == true
             && startsWith(arrayROIImportedNames[check], "SKIP") == false) {
-                crossref = Array.concat(crossref, check);
+                crossrefTrue = Array.concat(crossrefTrue, check);
         }
     }
-    Array.print(crossref);
-    // Count at that image for each ROI given by the index at crossref
-    for (applicableROI = 0; applicableROI < lengthOf(crossref); applicableROI++) {
-        roiManager("Select", crossref[applicableROI]);
+    Array.print(crossrefTrue);
+    // Count at that image for each ROI given by the index in crossref
+    for (i = 0; i < lengthOf(crossrefTrue); i++) {
+        roiManager("Select", crossrefTrue[i]);
         run("Measure");
     }
     // Save to the results
-    tableName = "" ;
-    run("New... ", "name="+tableName+" type=Table");
-    print(tableName, "\\Headings:[File Name]	[ROI]	[ROI Area]	[Ch1 Count]	[Ch2 Count]	[Ch3 Count]	[Ch2-3 OL Count]");
-
+    //tableName = "" ;
+    //run("New... ", "name="+tableName+" type=Table");
+    //print(tableName, "\\Headings:[File Name]	[ROI]	[ROI Area]	[Ch1 Count]	[Ch2 Count]	[Ch3 Count]	[Ch2-3 OL Count]");
+    selectWindow(arrayFileList[eachImage]);
+    close();
 }
 
 function roiAsArray(array) {
