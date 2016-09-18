@@ -18,8 +18,10 @@ arrayROILabels = newArray(numberofROI);
 askForROILabels(arrayROILabels);
 
 arrayFileList = getFileList(inputDirectory); // returns array
+Array.print(arrayFileList);
 // Remove non images from the array
-arrayFileList = removeNonImages(arrayFileList);
+arrayFileList = excludeNonImages(arrayFileList);
+Array.print(arrayFileList);
 
 run("ROI Manager...");
 roiManager("reset");
@@ -76,18 +78,17 @@ function isImage(filename) {
  return result;
 }
 
-function removeNonImages(array) {
+// Takes file array, returns array of only the images
+function excludeNonImages(array) {
+  array2 = newArray();
   for (i = 0; i < lengthOf(array); i++) {
     // User-defined function: isImage(filename), checks if it's an image
-    if (isImage(array[i]) == false) {
-      // Create two slices of the array flanking the desired removee
-      concat1 = Array.slice(array, 0, i);
-      concat2 = Array.slice(array, i+1, array.length);
-      // Create a new array that excludes the removee
-      array = Array.concat(concat1, concat2);
+    if (isImage(array[i]) == true) {
+      concat1 = Array.slice(array, i, (i+1));
+      array2 = Array.concat(array2, concat1);
     }
   }
-  return array;
+  return array2;
 } // returns the cleaned array
 
 function askHowManyROI() {

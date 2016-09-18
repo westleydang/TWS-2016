@@ -6,7 +6,7 @@ for each channel and counts the overlap.
 */
 
 // Variables and constants, change these CAPITALIZED parameters to fit your image resolution and stuff
-setBatchMode(false);
+setBatchMode(true);
 MASK_ENLARGE = 4; // this is how big your cell masks will be
 MASK_MAXIMA = 50; // this is the noise tolerance for Finding Maxima, this is irrelevant
 EXCLUSION_RADIUS = 2; // this is how much to clean up in Remove Outliers
@@ -15,15 +15,18 @@ EXCLUSION_CIRC = 0.00; // everything under this circularity is excluded in mask
 //maskNameArray = newArray(nSlices);
 
 inputDirectory = getDirectory("Select your folder of images to count");
+parentDirectory = File.getParent(inputDirectory)+"\\";
 inputFileList = getFileList(inputDirectory);
 inputFileList = excludeNonImages(inputFileList);
 
+setBatchMode(true);
 for (eachImage = 0; eachImage < lengthOf(inputFileList); eachImage++) {
     call("java.lang.System.gc"); // garbage collection cleans RAM
     open(inputFileList[eachImage]);
     FILENAME = getInfo("image.filename"); // this is the original file name of the opened file
     NAME_NO_EXT = File.nameWithoutExtension; // file name without extension
-
+    File.makeDirectory(parentDirectory+"\\masks\\");
+    File.makeDirectory(parentDirectory+"\\compare\\");
     doTheThing();
 }
 
@@ -57,10 +60,11 @@ function doTheThing() {
     rename("CombinedMasksDuplicate");
     setSlice(4);
     run("Delete Slice");
-    open(File.getParent(inputDirectory)+"\\"+FILENAME);
+    open(parentDirectory+"\\"+FILENAME);
     rename("super og");
     run("Merge Channels...", "  title=[original overlay] c1=[super og] c2=[CombinedMasksDuplicate] create");
-    saveWhatAsWhere("original overlay", "tif", inputDirectory+"compare]]"+FILENAME);
+    saveWhatAsWhere("Composite", "tif", parentDirectory+"\\compare\\"+"compare]]"+FILENAME);
+    selectWindow("compare]]"+FILENAME);
     close();
 
     // save all the masks into one file
@@ -68,15 +72,16 @@ function doTheThing() {
     run("Duplicate...", "duplicate");
     rename("CombinedMasksDuplicate");
     selectWindow(FILENAME); // you have to select this otherwise you can't grab the image directory
+    saveWhatAsWhere("CombinedMasksDuplicate", "tif", parentDirectory+"\\masks\\"+"masksonly]]"+FILENAME);
     close();
 
     // Save the combined masks
-    selectWindow("CombinedMasks");
+    // selectWindow("CombinedMasks");
 
     // Overlay the masks onto the orignial channels, then save.
     //run("Concatenate...", "  title=[overlaid] image1=[all da masks] image2=["+filename+"]");
 
-    run("Merge Channels...", "  title=[Overlay] c1=[CombinedMasks] c2=["+processedImg+"] create");
+    // run("Merge Channels...", "  title=[Overlay] c1=[CombinedMasks] c2=["+processedImg+"] create");
 
     //saveWhatAsWhere("Composite", "tif", inputDirectory+"composite_"+FILENAME);
     closeAllWindows();
@@ -147,10 +152,18 @@ function createMasksForEachSlice(img, enlargeConstant, maximaConstant) {
     print("on " + currentSlice);
     setSlice(currentSlice);
   	run("Select None");
-    run("Find Maxima...", "noise="+maximaConstant+" output=[Point Selection]");
+    run("Find Maxima...", "noise="+maximaConstant+" output=[Count]");
+    print("asdf"+getResult("Count"));
+    if (startsWith(getResult("Count"), "0") == false) {
+        run("Find Maxima...", "noise="+maximaConstant+" output=[Point Selection]");
+    }
+    else {
+        x=newArray(1); y=newArray(1); x[0]=1; y[0]=1;
+        makeSelection("point", x, y);
+    }
     run("Enlarge...", "enlarge="+enlargeConstant+"");
     run("Create Mask"); // creates a new image with masks
-  	run("Watershed", "stack");
+    run("Watershed", "stack");
     rename("Mask-"+currentSlice);
     //maskNameArray[currentSlice-1] = "Mask-"+currentSlice+"";
     selectWindow(img);
