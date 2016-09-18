@@ -14,7 +14,7 @@ EXCLUSION_SIZE = 20; // everything under this many pixels is excluded in mask
 EXCLUSION_CIRC = 0.00; // everything under this circularity is excluded in mask
 //maskNameArray = newArray(nSlices);
 
-inputDirectory = getDirectory("Select your folder of images");
+inputDirectory = getDirectory("Select your folder of images to count");
 inputFileList = getFileList(inputDirectory);
 inputFileList = excludeNonImages(inputFileList);
 
@@ -57,8 +57,10 @@ function doTheThing() {
     rename("CombinedMasksDuplicate");
     setSlice(4);
     run("Delete Slice");
-    selectWindow(FILENAME);
-    saveWhatAsWhere("CombinedMasksDuplicate", "tif", getInfo("image.directory")+"\\toCompareToOrig_"+FILENAME);
+    open(File.getParent(inputDirectory)+"\\"+FILENAME);
+    rename("super og");
+    run("Merge Channels...", "  title=[original overlay] c1=[super og] c2=[CombinedMasksDuplicate] create");
+    saveWhatAsWhere("original overlay", "tif", inputDirectory+"compare]]"+FILENAME);
     close();
 
     // save all the masks into one file
@@ -66,7 +68,6 @@ function doTheThing() {
     run("Duplicate...", "duplicate");
     rename("CombinedMasksDuplicate");
     selectWindow(FILENAME); // you have to select this otherwise you can't grab the image directory
-    saveWhatAsWhere("CombinedMasksDuplicate", "tif", getInfo("image.directory")+"\\allMasks_"+FILENAME);
     close();
 
     // Save the combined masks
@@ -76,6 +77,8 @@ function doTheThing() {
     //run("Concatenate...", "  title=[overlaid] image1=[all da masks] image2=["+filename+"]");
 
     run("Merge Channels...", "  title=[Overlay] c1=[CombinedMasks] c2=["+processedImg+"] create");
+
+    //saveWhatAsWhere("Composite", "tif", inputDirectory+"composite_"+FILENAME);
     closeAllWindows();
 }
 
