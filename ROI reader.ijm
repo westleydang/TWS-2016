@@ -11,7 +11,7 @@ newImage("Untitled", "8-bit black", 1, 1, 1);
 // Ask user to select the folder of images to count
 inputDirectory = getDirectory("Choose a Directory");
 arrayFileList = getFileList(inputDirectory);
-arrayFileList = removeNonImages(arrayFileList);
+arrayFileList = excludeNonImages(arrayFileList);
 
 Array.print(arrayFileList);
 // Ask user to select the ROI
@@ -36,10 +36,12 @@ resultsFilename = "Measurements from "+getFormattedDate();
 setBatchMode(true);
 // For each image
 for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
+    print("==> On image... "+arrayFileList[eachImage]);
     // For the specified image passed in, check if the
     // image has any corresponding ROIs in the entire array,
     // then eturns new array of non-skipped pointers
     crossrefTrue = getNonSkippedROI(arrayFileList[eachImage], arrayROIImportedNames);
+    print("==> Here is array crossrefTrue:");
     Array.print(crossrefTrue);
 
     // Count at that image for each ROI given by the index in crossrefTrue
@@ -57,11 +59,15 @@ for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
         for(slice = 0; slice < nSlices; slice++) {
             setSlice(slice+1);
             run("Measure");
-            run("Find Maxima...", "noise=0 output=[Count]");
+            run("Find Maxima...", "noise=1 output=[Count]");
             resultsName = Array.concat(resultsName, parsedName[2]);
             resultsRegion = Array.concat(resultsRegion, parsedName[0]);
             resultsChannel = Array.concat(resultsChannel, (slice+1));
             resultsCount = Array.concat(resultsCount, getResult("Count"));
+            print(parsedName[2]);
+            print(parsedName[0]);
+            print((slice+1));
+            print(getResult("Count"));
         }
     }
     selectWindow(arrayFileList[eachImage]);
@@ -78,6 +84,7 @@ close();
 /* =====================================================
 End of macro. Library of functions are below.
 =======================================================*/
+
 /*
 Passes in the array of ROI names, and then crossreferences the passed image
 to find the ROI names that correspond to that image. Then checks for which
@@ -89,10 +96,14 @@ function getNonSkippedROI(img, roiList) {
     open(inputDirectory+img);
     for (check = 0; check < lengthOf(roiList); check++) {
         // If yes, then make add to the list of ROIs to count
-        print("file match " + endsWith(roiList[check], img));
+        print("==> Assessing file: "+img);
+        parse1 = split(img, "]]");
+        print("file match " + endsWith(roiList[check], parse1[lengthOf(parse1)-1]));
+        print(parse1[lengthOf(parse1)-1]);
+        print(roiList[check]);
         print("skip " + startsWith(roiList[check], "SKIP"));
 
-        if (endsWith(roiList[check], img) == true
+        if (endsWith(roiList[check], parse1[lengthOf(parse1)-1]) == true
             && startsWith(roiList[check], "SKIP") == false) {
                 array = Array.concat(array, check);
         }
@@ -121,18 +132,17 @@ function isImage(filename) {
  return result;
 }
 
-function removeNonImages(array) {
+// Takes file array, returns array of only the images
+function excludeNonImages(array) {
+  array2 = newArray();
   for (i = 0; i < lengthOf(array); i++) {
     // User-defined function: isImage(filename), checks if it's an image
-    if (isImage(arrayFileList[i]) == false) {
-      // Create two slices of the array flanking the desired removee
-      concat1 = Array.slice(array, 0, i);
-      concat2 = Array.slice(array, i+1, array.length);
-      // Create a new array that excludes the removee
-      array = Array.concat(concat1, concat2);
+    if (isImage(array[i]) == true) {
+      concat1 = Array.slice(array, i, (i+1));
+      array2 = Array.concat(array2, concat1);
     }
   }
-  return array;
+  return array2;
 } // returns the cleaned array
 
 function closeAllImages() {
