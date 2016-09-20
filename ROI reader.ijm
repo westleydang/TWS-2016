@@ -90,6 +90,7 @@ Passes in the array of ROI names, and then crossreferences the passed image
 to find the ROI names that correspond to that image. Then checks for which
 regions to skip, and then returns an array of all the non-skipped regions.
 */
+
 function getNonSkippedROI(img, roiList) {
     array = newArray();
     // Open the image

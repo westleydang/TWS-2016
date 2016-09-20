@@ -91,6 +91,27 @@ print("==> DONE WITH MACR0 at " + getFormattedTime);
 ============================ FUNCTION LIBRARY BELOW ===========================
 */
 
+// Takes image, splits channels and saves it to specified path
+// Notice: Channels saved as slice000x_FILENAME.tif
+function splitAndSave(img, toWhere) {
+    open(img);
+    run("Stack Splitter", "number="+nSlices); // outputs as slice000x_FILENAME
+    listOpenImages = getListOpenImages();
+    print("==> Listing open images.. ");
+    Array.print(listOpenImages);
+    for (openImages=0; openImages < lengthOf(listOpenImages); openImages++) {
+        selectWindow(listOpenImages[openImages]);
+        print(listOpenImages[openImages]);
+        if (startsWith(getTitle(), "slice000") == true) {
+            saveAs("tif", toWhere+getTitle());
+            print("found a match, saving");
+            close();
+        }
+        else {print("not a match");  }
+    }
+    print("done split and save");
+}
+
 // Takes directory where temp channels are split, recombines and then
 // outputs to the specified output directory
 function restackImages(fromWhere, toWhere) {
@@ -111,26 +132,6 @@ function restackImages(fromWhere, toWhere) {
     for (eachImage = 0; eachImage < lengthOf(tempArray2); eachImage++) {
         File.delete(fromWhere+tempArray2[eachImage]);
     }
-}
-
-// Takes image, splits channels and saves it to specified path
-// Notice: Channels saved as slice000x_FILENAME.tif
-function splitAndSave(img, toWhere) {
-    open(img);
-    run("Stack Splitter", "number="+nSlices); // outputs as slice000x_FILENAME
-    listOpenImages = getListOpenImages();
-    Array.print(listOpenImages);
-    for (openImages=0; openImages < lengthOf(listOpenImages); openImages++) {
-        selectWindow(listOpenImages[openImages]);
-        print(listOpenImages[openImages]);
-        if (startsWith(getTitle(), "slice000") == true) {
-            saveAs("tif", toWhere+getTitle());
-            print("found a match, saving");
-            close();
-        }
-        else {print("not a match");  }
-    }
-    print("done split and save");
 }
 
 // Asks user to choose classifiers
@@ -181,11 +182,12 @@ function closeAllWindows() {
   }
 
 function getListOpenImages() {
-    list = newArray(nImages);
-    for (i=0; i <nImages; i++) {
-        if (isImage(list[i]) == true) {
-            selectImage(i+1);
-            list[i] = getTitle();
+    list = newArray();
+    for (i=0; i < nImages; i++) {
+        selectImage(i+1);
+        t = getTitle();
+        if (isImage(t) == true) {
+            list = Array.concat(list, t);
         }
     }
     return list;
@@ -195,7 +197,8 @@ function closeAllImages() {
     list = getListOpenImages();
     for (i=0; i <nImages; i++) {
         selectImage(i+1);
-        if (isImage(list[i]) == true) {
+        t = getTitle();
+        if (isImage(t) == true) {
             close();
         }
     }

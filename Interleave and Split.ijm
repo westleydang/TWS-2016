@@ -15,7 +15,7 @@ inputDirectory = getDirectory("What images do you want to feed me?");
 // Get list of images
 arrayFood = getFileList(inputDirectory);
 arrayFood = excludeNonImages(arrayFood);
-
+Array.print(arrayFood);
 // Get number of images to food trainer
 numberOfImages = lengthOf(arrayFood);
 
@@ -24,10 +24,15 @@ j=1;
 for (i = 0; i < numberOfImages; i++) {
     // if odd (if counter is even):
     if (i % 2 == 0) {
+        // Have to rename the files because the Interleave function
+        // has trouble if the filenames start with the same word
+        // and just interleves the image onto itself
         open(inputDirectory+arrayFood[i]);
+        rename("stack_"+arrayFood[i]);
         open(inputDirectory+arrayFood[(i+1)]);
-        interleaveString = "stack=["+arrayFood[i]+"] stack=["+arrayFood[(i+1)]+"]";
-        print(interleaveString);
+        rename("stack_"+arrayFood[(i+1)]);
+        interleaveString = "stack=[stack_"+arrayFood[i]+"] stack=[stack_"+arrayFood[(i+1)]+"]";
+        print(i +", "+ interleaveString);
         run("Interleave", interleaveString);
         selectWindow("Combined Stacks");
         rename("CS-"+j);
@@ -44,11 +49,14 @@ for (i = 0; i < numberOfImages; i++) {
             }
         }
     }
+    else {}
 }
 
 run("Interleave", "stack=CS-1 stack=CS-2");
 selectWindow("Combined Stacks");
 run("Stack Splitter", "number=3");
+
+print("==> END MACRO. ")
 
 function isImage(filename) {
  extensions = newArray("tif", "tiff", "jpg", "bmp");
