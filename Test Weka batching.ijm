@@ -83,7 +83,7 @@ for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
     call("java.lang.System.gc");
     call("java.lang.System.gc");
 }
-print("==> DONE WITH MACR0 at " + getFormattedTime);
+print("==> DONE WITH MACR0 at " + getFormattedTime());
 
 
 /*

@@ -19,17 +19,25 @@ parentDirectory = File.getParent(inputDirectory)+"\\";
 inputFileList = getFileList(inputDirectory);
 inputFileList = excludeNonImages(inputFileList);
 
+File.makeDirectory(parentDirectory+"\\masks\\");
+File.makeDirectory(parentDirectory+"\\compare\\");
+
 setBatchMode(true);
 for (eachImage = 0; eachImage < lengthOf(inputFileList); eachImage++) {
     call("java.lang.System.gc"); // garbage collection cleans RAM
     open(inputFileList[eachImage]);
+    // Print job status
+    print("==> Starting image... "+(eachImage+1)+"/"+lengthOf(inputFileList)+1);
+
     FILENAME = getInfo("image.filename"); // this is the original file name of the opened file
     NAME_NO_EXT = File.nameWithoutExtension; // file name without extension
-    File.makeDirectory(parentDirectory+"\\masks\\");
-    File.makeDirectory(parentDirectory+"\\compare\\");
     doTheThing();
 }
+print("==> DONE WITH MACRO");
 
+/*
+
+*/
 
 function doTheThing() {
     print("working on " + FILENAME + getFormattedTime());
