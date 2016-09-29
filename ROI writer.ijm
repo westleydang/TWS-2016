@@ -29,6 +29,8 @@ roiManager("reset");
 arrayROIIndex = newArray(numberofROI * lengthOf(arrayFileList));
 arrayROINames = newArray(numberofROI * lengthOf(arrayFileList));
 
+setName = askSaveName();
+
 for (eachImage = 0; eachImage < (lengthOf(arrayFileList)); eachImage++) {
     open(inputDirectory + arrayFileList[eachImage]);
     for (eachROI = 0; eachROI < numberofROI; eachROI++) {
@@ -58,7 +60,7 @@ for (eachImage = 0; eachImage < (lengthOf(arrayFileList)); eachImage++) {
     } // finish for each ROI
 
     // save then close image
-    roiManager("save", inputDirectory+getFormattedDate()+"_ROIset.zip");
+    roiManager("save", inputDirectory+setName+".zip");
     close(arrayFileList[eachImage]);
 }
 call("java.lang.System.gc"); // garbage collection cleans RAM
@@ -90,6 +92,14 @@ function excludeNonImages(array) {
   }
   return array2;
 } // returns the cleaned array
+
+function askSaveName() {
+    Dialog.create("Save ROI set as: ");
+    Dialog.addString("What do you want to save the file as?", getFormattedDate()+"_ROIset");
+    Dialog.show();
+    input = Dialog.getString();
+    return input;
+}
 
 function askHowManyROI() {
   Dialog.create("ROI Setup");
