@@ -45,23 +45,24 @@ function doTheThing() {
     run("Duplicate...", "duplicate");
     rename("Duplicate");
 
-    intersectedOG = createOriginalIntersection();
-
     // Process the image binary
     // results in "Mask of Binary_Duplicate"
-    processedImg = processImageBinary(intersectedOG, EXCLUSION_RADIUS, EXCLUSION_SIZE, EXCLUSION_CIRC);
+    // In this version, it will have 3 channels processed
+    processedImg = processImageBinary("Duplicate", EXCLUSION_RADIUS, EXCLUSION_SIZE, EXCLUSION_CIRC);
+
 
     // Create masks for each slice in the processed binary, passed with these mask parameters
+    // These masks will then have 3 images open
     createMasksForEachSlice(processedImg, MASK_ENLARGE, MASK_MAXIMA);
 
 
     // Create mask intersection
-    // intersect("Mask-2", "Mask-3");
-    // rename("Mask-OL23");
+    intersect("Mask-2", "Mask-3");
+    rename("Mask-OL23");
 
     // Concatenate all the masks to analyze for overlap, then save.
-    run("Concatenate...", "  title=[CombinedMasks] image1=Mask-1 image2=Mask-2 image3=Mask-3 image4=Mask-4 create");
-
+    run("Concatenate...", "  title=[CombinedMasks] image1=Mask-1 image2=Mask-2 image3=Mask-3 image4=Mask-OL23 create");
+/*
     // save the real channel masks to compare to the original image
     selectWindow("CombinedMasks");
     run("Duplicate...", "duplicate");
@@ -74,7 +75,7 @@ function doTheThing() {
     saveWhatAsWhere("Composite", "tif", parentDirectory+"\\compare\\"+"compare]]"+FILENAME);
     selectWindow("compare]]"+FILENAME);
     close();
-
+*/
     // save all the masks into one file
     selectWindow("CombinedMasks");
     run("Duplicate...", "duplicate");

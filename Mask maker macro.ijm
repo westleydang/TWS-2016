@@ -31,6 +31,8 @@ for (eachImage = 0; eachImage < lengthOf(inputFileList); eachImage++) {
 
     FILENAME = getInfo("image.filename"); // this is the original file name of the opened file
     NAME_NO_EXT = File.nameWithoutExtension; // file name without extension
+
+    // DO THE THING
     doTheThing();
 }
 print("==> DONE WITH MACRO");
