@@ -1,23 +1,15 @@
 /*
 
-Make TWS batch a folder of images under the TWS
 
 
 
-- get input directory for
-- get output directory or make one
-- ask classifier FOR EACH channel
-- open image
-- split image
-- check if temp folder 1 exists
-- if not then make temp folder 1
-- name and save image to a temp folder 1
-- get temp folder list of files
-- for each channel
-- open the image
-- load corresponding classifier
-- apply classifier
-- output to secure output directory
+
+This is old: use Test Weka batching.ijm instead.
+
+
+
+
+
 
 */
 

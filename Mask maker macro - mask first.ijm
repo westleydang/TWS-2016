@@ -7,7 +7,7 @@ for each channel and counts the overlap.
 
 // Variables and constants, change these CAPITALIZED parameters to fit your image resolution and stuff
 setBatchMode(true);
-MASK_ENLARGE = 4; // this is how big your cell masks will be
+MASK_ENLARGE = 3; // this is how big your cell masks will be
 MASK_MAXIMA = 50; // this is the noise tolerance for Finding Maxima, this is irrelevant
 EXCLUSION_RADIUS = 2; // this is how much to clean up in Remove Outliers
 EXCLUSION_SIZE = 20; // everything under this many pixels is excluded in mask

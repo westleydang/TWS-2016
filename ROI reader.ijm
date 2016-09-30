@@ -80,6 +80,7 @@ Array.show(resultsFilename, resultsName, resultsRegion, resultsChannel, resultsC
 selectWindow(resultsFilename);
 saveAs(resultsFilename, inputDirectory+resultsFilename+".csv");
 close();
+print("==> DONE WITH MACRO AT " +getFormattedTime());
 
 /* =====================================================
 End of macro. Library of functions are below.
@@ -99,10 +100,10 @@ function getNonSkippedROI(img, roiList) {
         // If yes, then make add to the list of ROIs to count
         print("==> Assessing file: "+img);
         parse1 = split(img, "]]");
-        print("file match " + endsWith(roiList[check], parse1[lengthOf(parse1)-1]));
-        print(parse1[lengthOf(parse1)-1]);
-        print(roiList[check]);
-        print("skip " + startsWith(roiList[check], "SKIP"));
+        // print("file match " + endsWith(roiList[check], parse1[lengthOf(parse1)-1])); // for debugging
+        // print(parse1[lengthOf(parse1)-1]); // for debugging
+        // print(roiList[check]); // for debugging
+        // print("skip " + startsWith(roiList[check], "SKIP")); // for debugging
 
         if (endsWith(roiList[check], parse1[lengthOf(parse1)-1]) == true
             && startsWith(roiList[check], "SKIP") == false) {
@@ -171,4 +172,15 @@ function getFormattedDate() {
      MonthNames = newArray("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec");
      resultDate = ""+dayOfMonth+"-"+MonthNames[month]+"-"+year;
      return resultDate;
+}
+function getFormattedTime() {
+   getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+   TimeString = "\nTime: ";
+   if (hour<10) {TimeString = TimeString+"0";}
+   TimeString = TimeString+hour+":";
+   if (minute<10) {TimeString = TimeString+"0";}
+   TimeString = TimeString+minute+":";
+   if (second<10) {TimeString = TimeString+"0";}
+   TimeString = TimeString+second;
+   return TimeString;
 }
