@@ -31,6 +31,7 @@ resultsChannel = newArray();
 resultsRegion = newArray();
 resultsName = newArray();
 resultsCount = newArray();
+resultsArea = newArray()
 resultsFilename = "Measurements from "+getFormattedDate();
 
 setBatchMode(true);
@@ -59,6 +60,8 @@ for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
         for(slice = 0; slice < nSlices; slice++) {
             setSlice(slice+1);
             run("Measure");
+            resultsArea = Array.concat(resultsArea, getResult("Area"));
+            print("area ==> " + getResult("Area"));
             run("Find Maxima...", "noise=1 output=[Count]");
             resultsName = Array.concat(resultsName, parsedName[2]);
             resultsRegion = Array.concat(resultsRegion, parsedName[0]);
@@ -75,7 +78,7 @@ for (eachImage = 0; eachImage < lengthOf(arrayFileList); eachImage++) {
     call("java.lang.System.gc"); // garbage collection cleans RAM
 }
 
-Array.show(resultsFilename, resultsName, resultsRegion, resultsChannel, resultsCount);
+Array.show(resultsFilename, resultsName, resultsRegion, resultsChannel, resultsCount, resultsArea);
 
 selectWindow(resultsFilename);
 saveAs(resultsFilename, inputDirectory+resultsFilename+".csv");
