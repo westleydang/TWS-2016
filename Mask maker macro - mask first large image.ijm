@@ -7,7 +7,7 @@ for each channel and counts the overlap.
 
 // Variables and constants, change these CAPITALIZED parameters to fit your image resolution and stuff
 setBatchMode(true);
-MASK_ENLARGE = 9; // this is how big your cell masks will be
+MASK_ENLARGE = 8; // this is how big your cell masks will be
 MASK_MAXIMA = 50; // this is the noise tolerance for Finding Maxima, this is irrelevant
 EXCLUSION_RADIUS = 5; // this is how much to clean up in Remove Outliers
 EXCLUSION_SIZE = 40; // everything under this many pixels is excluded in mask
@@ -27,7 +27,7 @@ for (eachImage = 0; eachImage < lengthOf(inputFileList); eachImage++) {
     call("java.lang.System.gc"); // garbage collection cleans RAM
     open(inputFileList[eachImage]);
     // Print job status
-    print("==> Starting image... "+(eachImage+1)+"/"+lengthOf(inputFileList)+1);
+    print("==> Starting image... "+(eachImage+1)+"/"+lengthOf(inputFileList));
 
     FILENAME = getInfo("image.filename"); // this is the original file name of the opened file
     NAME_NO_EXT = File.nameWithoutExtension; // file name without extension
@@ -50,11 +50,9 @@ function doTheThing() {
     // In this version, it will have 3 channels processed
     processedImg = processImageBinary("Duplicate", EXCLUSION_RADIUS, EXCLUSION_SIZE, EXCLUSION_CIRC);
 
-
     // Create masks for each slice in the processed binary, passed with these mask parameters
     // These masks will then have 3 images open
     createMasksForEachSlice(processedImg, MASK_ENLARGE, MASK_MAXIMA);
-
 
     // Create mask intersection
     intersect("Mask-2", "Mask-3");
@@ -69,8 +67,8 @@ function doTheThing() {
     rename("CombinedMasksDuplicate");
     setSlice(4);
     run("Delete Slice");
-
-    open(parentDirectory+"\\"+FILENAME);
+open(FILENAME);
+    //open(parentDirectory+"\\"+FILENAME);
     rename("super og");
     run("Merge Channels...", "  title=[original overlay] c1=[super og] c2=[CombinedMasksDuplicate] create");
     saveWhatAsWhere("Composite", "tif", parentDirectory+"\\compare\\"+"compare]]"+FILENAME);
@@ -128,19 +126,16 @@ function processImageBinary(img, radiusExclusion, sizeExclusion, circExclusion) 
   run("Make Binary", "method=Default background=Dark calculate black");
   rename("Binary_Duplicate");
 
+  run("Remove Outliers...", "radius="+radiusExclusion+" threshold=1 which=Bright stack");
   // Clean the image by filling in the holes and removing noise.
   // this file is called "<filename>"
-  run("Watershed", "stack");
-  for (i=0; i<2; i++) {
-      run("Remove Outliers...", "radius=1 threshold=1 which=Bright stack");
+  for (i=0; i<1; i++) {
+     // run("Remove Outliers...", "radius=1 threshold=1 which=Bright stack");
       run("Dilate", "stack");
       run("Fill Holes", "stack");
       run("Erode", "stack");
       run("Watershed", "stack");
   }
-  run("Remove Outliers...", "radius="+radiusExclusion+" threshold=1 which=Bright stack");
-  run("Dilate", "stack");
-  run("Watershed", "stack");
 
   // Make new mask that excludes small and non circular particles
   // this file is called "Mask of <filename>"
@@ -163,7 +158,7 @@ function createMasksForEachSlice(img, enlargeConstant, maximaConstant) {
     setSlice(currentSlice);
   	run("Select None");
     run("Find Maxima...", "noise="+maximaConstant+" output=[Count]");
-    print("slice "+currentSlice+" "+getResult("Count"));
+    print("==> "+getFormattedTime()+", slice "+currentSlice+" "+getResult("Count"));
     if (startsWith(getResult("Count"), "0") == false) {
         run("Find Maxima...", "noise="+maximaConstant+" output=[Point Selection]");
     }
