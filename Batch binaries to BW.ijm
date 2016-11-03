@@ -32,4 +32,16 @@ for (currentCaterpillar = 0; currentCaterpillar < toTransformList.length; curren
     call("java.lang.System.gc");
     call("java.lang.System.gc");
     call("java.lang.System.gc");
+print(getFormattedTime() + "FINSHED THE MACRO");
 
+function getFormattedTime() {
+   getDateAndTime(year, month, dayOfWeek, dayOfMonth, hour, minute, second, msec);
+   TimeString = "\nTime: ";
+   if (hour<10) {TimeString = TimeString+"0";}
+   TimeString = TimeString+hour+":";
+   if (minute<10) {TimeString = TimeString+"0";}
+   TimeString = TimeString+minute+":";
+   if (second<10) {TimeString = TimeString+"0";}
+   TimeString = TimeString+second;
+   return TimeString;
+}
