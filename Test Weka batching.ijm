@@ -75,13 +75,14 @@ for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
         File.delete(inputDirectory+SUBDIR_TEMP1+tempList1[eachSplit]);
         print("   ==> "+getFormattedTime()+": Finished classifying... "+ tempList1[eachSplit]);
         closeAllImages();
+        call("java.lang.System.gc");
+        call("java.lang.System.gc");
+        call("java.lang.System.gc");
     }
 
     // restack images from input dir to output dir
     restackImages(inputDirectory+SUBDIR_TEMP2, inputDirectory+SUBDIR_FINALOUTPUT);
-    call("java.lang.System.gc");
-    call("java.lang.System.gc");
-    call("java.lang.System.gc");
+
 }
 print("==> DONE WITH MACR0 at " + getFormattedTime());
 
