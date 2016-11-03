@@ -35,7 +35,7 @@ setBatchMode(true);
 inputFileList = getFileList(inputDirectory);
 inputFileList = excludeNonImages(inputFileList);
 
-print("==>  I sense "+inputFileList.length+" files...");
+print("   ==>  I sense "+inputFileList.length+" files...");
 
 // Ask the user to choose classifiers, save to array
 classifierArray = chooseClassifiers();
@@ -45,18 +45,18 @@ run("Trainable Weka Segmentation");
 
 for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
     // Split the channels into sep images in subfolder
-    print("==> Splitting and saving... "+ inputDirectory+inputFileList[eachImage]);
+    print("   ==> Splitting and saving... "+ inputDirectory+inputFileList[eachImage]);
     splitAndSave(inputDirectory+inputFileList[eachImage], inputDirectory+SUBDIR_TEMP1);
 
     tempList1 = getFileList(inputDirectory+SUBDIR_TEMP1);
     // Sort to make sure the channels are in order with classifier
     tempList1 = Array.sort(tempList1);
-    print("Here are the split channel images: ");
+    print("   ==> Here are the split channel images: ");
     Array.print(tempList1);
 
     // For each channel/image , WEKA and then save each classified image
     for (eachSplit = 0; eachSplit < lengthOf(tempList1); eachSplit++) {
-        print("==> Here are the classifiers I will be using...");
+        print("   ==> Here are the classifiers I will be using...");
         print(classifierArray[eachSplit]);
         selectWindow("Trainable Weka Segmentation v3.1.0");
 
@@ -65,7 +65,7 @@ for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
 
         // Applies to image file from Split Temp 1 where the split files are
         // Stores in SUBDIR_TEMP2
-        print("==> Trying to apply classifier... "+ tempList1[eachSplit]);
+        print("   ==> Trying to apply classifier... "+ tempList1[eachSplit]);
         call("trainableSegmentation.Weka_Segmentation.applyClassifier",
             inputDirectory+SUBDIR_TEMP1, tempList1[eachSplit],
             "showResults=false", "storeResults=true","probabilityMaps=false",
@@ -73,7 +73,7 @@ for (eachImage=0; eachImage < lengthOf(inputFileList); eachImage++) {
         // Deletes the temp channels because we don't need it any more
         print("==> Deleting... "+ inputDirectory+SUBDIR_TEMP1+tempList1[eachSplit]);
         File.delete(inputDirectory+SUBDIR_TEMP1+tempList1[eachSplit]);
-        print("==> Finished classifying... "+ tempList1[eachSplit]);
+        print("   ==> "+getFormattedTime()+": Finished classifying... "+ tempList1[eachSplit]);
         closeAllImages();
     }
 

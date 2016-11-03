@@ -1,7 +1,7 @@
 /*
 @Author: Westley Dang
 This macro uses the Trainable WEKA Segmentation plugin to create a
-results of the cells locattion, then uses that image to create masks
+results of the cells location, then uses that image to create masks
 for each channel and counts the overlap.
 */
 
@@ -9,9 +9,9 @@ for each channel and counts the overlap.
 setBatchMode(true);
 MASK_ENLARGE = 3; // this is how big your cell masks will be
 MASK_MAXIMA = 50; // this is the noise tolerance for Finding Maxima, this is irrelevant
-EXCLUSION_RADIUS = 2; // this is how much to clean up in Remove Outliers
+EXCLUSION_RADIUS = 3; // this is how much to clean up in Remove Outliers
 EXCLUSION_SIZE = 20; // everything under this many pixels is excluded in mask
-EXCLUSION_CIRC = 0.00; // everything under this circularity is excluded in mask
+EXCLUSION_CIRC = 0.10; // everything under this circularity is excluded in mask
 //maskNameArray = newArray(nSlices);
 
 inputDirectory = getDirectory("Select your folder of images to count");
@@ -62,20 +62,21 @@ function doTheThing() {
 
     // Concatenate all the masks to analyze for overlap, then save.
     run("Concatenate...", "  title=[CombinedMasks] image1=Mask-1 image2=Mask-2 image3=Mask-3 image4=Mask-OL23 create");
-/*
-    // save the real channel masks to compare to the original image
-    selectWindow("CombinedMasks");
-    run("Duplicate...", "duplicate");
-    rename("CombinedMasksDuplicate");
-    setSlice(4);
-    run("Delete Slice");
-    open(parentDirectory+"\\"+FILENAME);
-    rename("super og");
-    run("Merge Channels...", "  title=[original overlay] c1=[super og] c2=[CombinedMasksDuplicate] create");
-    saveWhatAsWhere("Composite", "tif", parentDirectory+"\\compare\\"+"compare]]"+FILENAME);
-    selectWindow("compare]]"+FILENAME);
-    close();
-*/
+
+// save the real channel masks to compare to the original image
+selectWindow("CombinedMasks");
+run("Duplicate...", "duplicate");
+rename("CombinedMasksDuplicate");
+setSlice(4);
+run("Delete Slice");
+open(FILENAME);
+//open(parentDirectory+"\\"+FILENAME);
+rename("super og");
+run("Merge Channels...", "  title=[original overlay] c1=[super og] c2=[CombinedMasksDuplicate] create");
+saveWhatAsWhere("Composite", "tif", parentDirectory+"\\compare\\"+"compare]]"+FILENAME);
+selectWindow("compare]]"+FILENAME);
+close();
+
     // save all the masks into one file
     selectWindow("CombinedMasks");
     run("Duplicate...", "duplicate");
@@ -127,19 +128,17 @@ function processImageBinary(img, radiusExclusion, sizeExclusion, circExclusion) 
   run("Make Binary", "method=Default background=Dark calculate black");
   rename("Binary_Duplicate");
 
-  // Clean the image by filling in the holes and removing noise.
-  // this file is called "<filename>"
-  run("Watershed", "stack");
-  for (i=0; i<2; i++) {
-      run("Remove Outliers...", "radius=1 threshold=1 which=Bright stack");
-      run("Dilate", "stack");
-      run("Fill Holes", "stack");
-      run("Erode", "stack");
-      run("Watershed", "stack");
-  }
-  run("Remove Outliers...", "radius="+radiusExclusion+" threshold=1 which=Bright stack");
-  run("Dilate", "stack");
-  run("Watershed", "stack");
+
+    run("Remove Outliers...", "radius="+radiusExclusion+" threshold=1 which=Bright stack");
+    // Clean the image by filling in the holes and removing noise.
+    // this file is called "<filename>"
+    for (i=0; i<1; i++) {
+       // run("Remove Outliers...", "radius=1 threshold=1 which=Bright stack");
+        run("Dilate", "stack");
+        run("Fill Holes", "stack");
+        run("Erode", "stack");
+        run("Watershed", "stack");
+    }
 
   // Make new mask that excludes small and non circular particles
   // this file is called "Mask of <filename>"
